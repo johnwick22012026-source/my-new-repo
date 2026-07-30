@@ -79,6 +79,7 @@ function App() {
         throw new Error(`Failed to create note: ${response.statusText}`);
       }
       const createdNote: Note = await response.json();
+      // Prepend the new note to the notes list
       setNotes(prev => [createdNote, ...prev]);
       setNewNoteText('');
     } catch (err: any) {
