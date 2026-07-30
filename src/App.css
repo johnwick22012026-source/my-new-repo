@@ -120,6 +120,7 @@ body {
   animation: fadeInUp 0.4s ease forwards;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease;
 }
 
 .note-item.completed {
@@ -209,6 +210,10 @@ body {
   color: #111827;
   word-break: break-word;
   flex-grow: 1;
+  /* Prepare for animation */
+  opacity: 1;
+  transform: translateY(0);
+  transition: none;
 }
 
 .note-meta {
@@ -248,6 +253,21 @@ body {
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScaleUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.note-item.new-note {
+  animation: fadeInScaleUp 0.5s ease forwards;
 }
 
 /* Responsive design */
