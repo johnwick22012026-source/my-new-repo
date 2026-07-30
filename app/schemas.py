@@ -27,3 +27,4 @@ class Note(NoteBase):
 
 class NoteCompleteRequest(BaseModel):
     id: int
+    completed: bool
