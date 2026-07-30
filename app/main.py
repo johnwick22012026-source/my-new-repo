@@ -56,10 +56,23 @@ async def update_note_completion(note_id: int, request: schemas.NoteCompleteRequ
     return note
 
 @app.delete("/notes/{note_id}", response_model=schemas.Note)
-async def delete_note(note_id: int, db: Session = Depends(get_db)):
+async def delete_note(note_id: int, confirm: bool = False, db: Session = Depends(get_db)):
+    """
+    Delete a note by ID only if confirmed and note is completed.
+    Query parameter 'confirm' must be True to proceed with deletion.
+    """
+    if not confirm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deletion not confirmed. Set 'confirm=true' query parameter to confirm deletion."
+        )
+
     note = db.query(models.Note).filter(models.Note.id == note_id).first()
     if not note:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    if not note.completed:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only completed notes can be deleted")
+
     db.delete(note)
     db.commit()
     return note
