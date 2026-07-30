@@ -1,0 +1,113 @@
+/* Overlay background */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInOverlay 0.3s ease forwards;
+  z-index: 1000;
+}
+
+/* Dialog container */
+.dialog-content {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  max-width: 90vw;
+  width: 400px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: slideDownDialog 0.3s ease forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  outline: none;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #b91c1c; /* red-700 */
+  font-weight: 700;
+  text-align: center;
+}
+
+.dialog-message {
+  font-size: 1rem;
+  color: #374151; /* gray-700 */
+  text-align: center;
+}
+
+.dialog-note-text {
+  background-color: #fee2e2; /* red-100 */
+  border-left: 4px solid #b91c1c; /* red-700 */
+  padding: 0.5rem 1rem;
+  font-style: italic;
+  color: #991b1b; /* red-800 */
+  margin: 0 auto;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dialog-button {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 100px;
+}
+
+.dialog-button.confirm {
+  background-color: #b91c1c; /* red-700 */
+  color: white;
+}
+.dialog-button.confirm:hover {
+  background-color: #991b1b; /* red-800 */
+}
+
+.dialog-button.cancel {
+  background-color: #e5e7eb; /* gray-200 */
+  color: #374151; /* gray-700 */
+}
+.dialog-button.cancel:hover {
+  background-color: #d1d5db; /* gray-300 */
+}
+
+/* Animations */
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDownDialog {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .dialog-content {
+    width: 90vw;
+    padding: 1rem 1.25rem;
+  }
+  .dialog-title {
+    font-size: 1.25rem;
+  }
+  .dialog-button {
+    font-size: 0.9rem;
+    min-width: 80px;
+    padding: 0.5rem 1rem;
+  }
+}
