@@ -48,12 +48,16 @@ body {
   font-size: 1rem;
   border: 2px solid #ddd;
   border-radius: 4px;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .note-input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 5px rgba(59,130,246,0.5);
+}
+.note-input.input-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 5px rgba(220,38,38,0.7);
 }
 
 .note-submit {
@@ -74,13 +78,21 @@ body {
   background-color: #2563eb;
 }
 
+.validation-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+  animation: fadeIn 0.3s ease forwards;
+}
+
 .search-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   border: 2px solid #ddd;
   border-radius: 4px;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   animation: slideDown 0.5s ease forwards;
 }
 .search-input:focus {
