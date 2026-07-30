@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import NotesList, { Note } from './components/NotesList';
 import ConfirmDeleteDialog from './components/ConfirmDeleteDialog';
@@ -23,11 +23,12 @@ function App() {
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
 
   // Fetch notes from API
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async (query = '') => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE}/notes`);
+      const url = query.trim() ? `${API_BASE}/notes/search?query=${encodeURIComponent(query.trim())}` : `${API_BASE}/notes`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch notes: ${response.statusText}`);
       }
@@ -38,11 +39,11 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [fetchNotes]);
 
   // Client-side validation for note text
   const validateNoteText = (text: string): string | null => {
@@ -80,6 +81,10 @@ function App() {
       // Prepend the new note to the notes list
       setNotes(prev => [createdNote, ...prev]);
       setNewNoteText('');
+      // If search is active, refetch notes with current search
+      if (searchText.trim()) {
+        fetchNotes(searchText);
+      }
     } catch (err: any) {
       setError(err.message || 'Unknown error');
     }
@@ -154,10 +159,16 @@ function App() {
     setNoteToDelete(null);
   };
 
-  // Filter notes by search text
-  const filteredNotes = notes.filter(note =>
-    note.text.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Debounce search input to reduce API calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchNotes(searchText);
+    }, 300); // 300ms debounce
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText, fetchNotes]);
 
   return (
     <div className="app-container">
@@ -194,7 +205,7 @@ function App() {
       {loading && <p className="loading">Loading notes...</p>}
       {error && <p className="error">Error: {error}</p>}
 
-      <NotesList notes={filteredNotes} onToggleComplete={handleToggleComplete} onDelete={handleDeleteRequest} />
+      <NotesList notes={notes} onToggleComplete={handleToggleComplete} onDelete={handleDeleteRequest} />
 
       <ConfirmDeleteDialog
         isOpen={confirmDialogOpen}
