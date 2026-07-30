@@ -6,6 +6,6 @@ class Note(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String, nullable=False)
-    is_completed = Column(Boolean, nullable=False, default=False)
+    completed = Column(Boolean, nullable=False, default=False)
+    completion_timestamp = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    completed_at = Column(DateTime(timezone=True), nullable=True)
