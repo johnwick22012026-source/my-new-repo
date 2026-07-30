@@ -50,3 +50,14 @@ async def mark_note_completed(request: schemas.NoteCompleteRequest, db: Session 
     db.commit()
     db.refresh(note)
     return note
+
+@app.delete("/notes/{note_id}", response_model=schemas.Note)
+async def delete_completed_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    if not note.is_completed:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Note is not completed and cannot be deleted")
+    db.delete(note)
+    db.commit()
+    return note
