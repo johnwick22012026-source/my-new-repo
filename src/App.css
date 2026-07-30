@@ -122,48 +122,167 @@ body {
   flex-direction: column;
 }
 
+.note-item.completed {
+  background-color: #d1fae5;
+}
+
+.note-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.checkbox-container {
+  position: relative;
+  padding-left: 24px;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #3b82f6;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkmarkDraw 0.3s ease forwards;
+}
+
+@keyframes checkmarkDraw {
+  from {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    width: 5px;
+    height: 10px;
+    opacity: 1;
+  }
+}
+
 .note-text {
-  margin: 0 0 0.25rem 0;
+  margin: 0;
   font-size: 1rem;
   color: #111827;
   word-break: break-word;
+  flex-grow: 1;
+}
+
+.note-meta {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .note-date {
   font-size: 0.75rem;
   color: #6b7280;
-  align-self: flex-end;
 }
 
-.loading, .error, .no-notes {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  margin-top: 1rem;
-}
-
-.error {
+.delete-button {
+  background: transparent;
+  border: none;
   color: #dc2626;
-  font-weight: 600;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+.delete-button:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.delete-button:not(:disabled):hover {
+  color: #b91c1c;
 }
 
 /* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsive design */
+@media (max-width: 480px) {
+  .note-text {
+    font-size: 0.9rem;
+  }
+  .note-date {
+    font-size: 0.65rem;
+  }
+  .delete-button {
+    font-size: 1rem;
+  }
+}
+
+/* Responsive layout adjustments for app container and form */
+@media (max-width: 768px) {
+  .app-container {
+    max-width: 90%;
+    padding: 1rem 1.5rem;
+  }
+  .note-form {
+    flex-direction: column;
+  }
+  .note-input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  .note-submit {
+    width: 100%;
+    padding: 0.75rem 0;
+    font-size: 1.1rem;
+  }
+}
+
 @media (max-width: 480px) {
   .app-container {
     padding: 1rem;
