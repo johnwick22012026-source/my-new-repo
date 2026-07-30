@@ -22,6 +22,7 @@ function App() {
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Fetch notes from API
   const fetchNotes = async () => {
@@ -45,13 +46,30 @@ function App() {
     fetchNotes();
   }, []);
 
+  // Client-side validation for note text
+  const validateNoteText = (text: string): string | null => {
+    if (!text || !text.trim()) {
+      return 'Note text must not be empty or whitespace only';
+    }
+    if (text.trim().length > 500) {
+      return 'Note text must not exceed 500 characters';
+    }
+    return null;
+  };
+
   // Handle form submit to create a new note
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNoteText.trim()) return;
+    const trimmedText = newNoteText.trim();
+    const validationMsg = validateNoteText(trimmedText);
+    if (validationMsg) {
+      setValidationError(validationMsg);
+      return;
+    }
+    setValidationError(null);
     setError(null);
     try {
-      const noteCreate: NoteCreate = { text: newNoteText.trim(), is_completed: false };
+      const noteCreate: NoteCreate = { text: trimmedText, is_completed: false };
       const response = await fetch(`${API_BASE}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,19 +95,24 @@ function App() {
     <div className="app-container">
       <h1 className="app-title">Notes Management</h1>
 
-      <form className="note-form" onSubmit={handleSubmit} aria-label="Add new note">
+      <form className="note-form" onSubmit={handleSubmit} aria-label="Add new note" noValidate>
         <input
           type="text"
           placeholder="Enter a new note"
           value={newNoteText}
           onChange={e => setNewNoteText(e.target.value)}
-          className="note-input"
+          className={`note-input ${validationError ? 'input-error' : ''}`}
           aria-label="New note text"
+          aria-invalid={validationError ? 'true' : 'false'}
+          aria-describedby={validationError ? 'note-error' : undefined}
+          maxLength={500}
         />
         <button type="submit" className="note-submit" disabled={!newNoteText.trim()}>
           Add Note
         </button>
       </form>
+
+      {validationError && <p id="note-error" className="validation-error" role="alert">{validationError}</p>}
 
       <input
         type="text"
