@@ -60,6 +60,8 @@ async def delete_note(note_id: int, db: Session = Depends(get_db)):
     note = db.query(models.Note).filter(models.Note.id == note_id).first()
     if not note:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    if not note.completed:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only completed notes can be deleted")
     db.delete(note)
     db.commit()
     return note
