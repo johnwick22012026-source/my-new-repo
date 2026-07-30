@@ -16,3 +16,6 @@ class Note(NoteBase):
 
     class Config:
         orm_mode = True
+
+class NoteCompleteRequest(BaseModel):
+    id: int
