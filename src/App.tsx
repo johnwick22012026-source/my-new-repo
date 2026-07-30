@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-
-interface Note {
-  id: number;
-  text: string;
-  is_completed: boolean;
-  created_at: string;
-  completed_at: string | null;
-}
+import NotesList, { Note } from './components/NotesList';
 
 interface NoteCreate {
   text: string;
-  is_completed?: boolean;
+  completed?: boolean;
 }
 
 const API_BASE = '';
@@ -69,7 +62,7 @@ function App() {
     setValidationError(null);
     setError(null);
     try {
-      const noteCreate: NoteCreate = { text: trimmedText, is_completed: false };
+      const noteCreate: NoteCreate = { text: trimmedText, completed: false };
       const response = await fetch(`${API_BASE}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,6 +75,53 @@ function App() {
       // Prepend the new note to the notes list
       setNotes(prev => [createdNote, ...prev]);
       setNewNoteText('');
+    } catch (err: any) {
+      setError(err.message || 'Unknown error');
+    }
+  };
+
+  // Handle toggle completion
+  const handleToggleComplete = async (id: number, completed: boolean) => {
+    setError(null);
+    // Optimistic UI update
+    setNotes(prev =>
+      prev.map(note => (note.id === id ? { ...note, completed } : note))
+    );
+    try {
+      const response = await fetch(`${API_BASE}/notes/${id}/completion`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, completed }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update note completion: ${response.statusText}`);
+      }
+      const updatedNote: Note = await response.json();
+      // Update note with backend response
+      setNotes(prev =>
+        prev.map(note => (note.id === id ? updatedNote : note))
+      );
+    } catch (err: any) {
+      setError(err.message || 'Unknown error');
+      // Revert optimistic update on error
+      setNotes(prev =>
+        prev.map(note => (note.id === id ? { ...note, completed: !completed } : note))
+      );
+    }
+  };
+
+  // Handle delete note
+  const handleDelete = async (id: number) => {
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE}/notes/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete note: ${response.statusText}`);
+      }
+      // Remove note from list
+      setNotes(prev => prev.filter(note => note.id !== id));
     } catch (err: any) {
       setError(err.message || 'Unknown error');
     }
@@ -127,15 +167,7 @@ function App() {
       {loading && <p className="loading">Loading notes...</p>}
       {error && <p className="error">Error: {error}</p>}
 
-      <ul className="notes-list">
-        {filteredNotes.map(note => (
-          <li key={note.id} className="note-item">
-            <p className="note-text">{note.text}</p>
-            <small className="note-date">Created: {new Date(note.created_at).toLocaleString()}</small>
-          </li>
-        ))}
-        {filteredNotes.length === 0 && !loading && <p className="no-notes">No notes found.</p>}
-      </ul>
+      <NotesList notes={filteredNotes} onToggleComplete={handleToggleComplete} onDelete={handleDelete} />
     </div>
   );
 }
