@@ -30,23 +30,27 @@ async def get_notes(db: Session = Depends(get_db)):
 async def create_note(note_create: schemas.NoteCreate, db: Session = Depends(get_db)):
     note = models.Note(
         text=note_create.text,
-        is_completed=note_create.is_completed
+        completed=note_create.completed
     )
     db.add(note)
     db.commit()
     db.refresh(note)
     return note
 
-@app.post("/notes/complete", response_model=schemas.Note)
-async def mark_note_completed(request: schemas.NoteCompleteRequest, db: Session = Depends(get_db)):
-    note = db.query(models.Note).filter(models.Note.id == request.id).first()
+@app.put("/notes/{note_id}/completion", response_model=schemas.Note)
+async def update_note_completion(note_id: int, request: schemas.NoteCompleteRequest, db: Session = Depends(get_db)):
+    if note_id != request.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Note ID in path and body must match")
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
     if not note:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
-    if note.is_completed:
-        # Already completed, just return
-        return note
-    note.is_completed = True
-    note.completed_at = datetime.utcnow()
+
+    note.completed = request.completed
+    if request.completed:
+        note.completion_timestamp = datetime.utcnow()
+    else:
+        note.completion_timestamp = None
+
     db.commit()
     db.refresh(note)
     return note
@@ -56,7 +60,7 @@ async def delete_completed_note(note_id: int, db: Session = Depends(get_db)):
     note = db.query(models.Note).filter(models.Note.id == note_id).first()
     if not note:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
-    if not note.is_completed:
+    if not note.completed:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Note is not completed and cannot be deleted")
     db.delete(note)
     db.commit()
