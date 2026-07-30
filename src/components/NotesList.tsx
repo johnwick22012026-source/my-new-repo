@@ -19,6 +19,8 @@ interface NotesListProps {
 const NotesList: React.FC<NotesListProps> = ({ notes, onToggleComplete, onDelete, newNoteId = null }) => {
   // State to track which notes are animating completion
   const [animatingCompletedIds, setAnimatingCompletedIds] = useState<Set<number>>(new Set());
+  // State to track which notes are animating deletion
+  const [animatingDeleteIds, setAnimatingDeleteIds] = useState<Set<number>>(new Set());
 
   // When a note's completed status changes from false to true, trigger animation
   useEffect(() => {
@@ -42,6 +44,21 @@ const NotesList: React.FC<NotesListProps> = ({ notes, onToggleComplete, onDelete
     }
   }, [notes, animatingCompletedIds]);
 
+  // Handle delete click with animation
+  const handleDeleteClick = (id: number) => {
+    // Add id to animatingDeleteIds to trigger animation
+    setAnimatingDeleteIds(prev => new Set(prev).add(id));
+    // After animation duration, call onDelete to remove note from parent state
+    setTimeout(() => {
+      onDelete(id);
+      setAnimatingDeleteIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }, 400); // match animation duration in CSS
+  };
+
   return (
     <>
       {notes.length === 0 ? (
@@ -51,10 +68,11 @@ const NotesList: React.FC<NotesListProps> = ({ notes, onToggleComplete, onDelete
           {notes.map(note => {
             const isNewNote = note.id === newNoteId;
             const isAnimatingComplete = animatingCompletedIds.has(note.id);
+            const isAnimatingDelete = animatingDeleteIds.has(note.id);
             return (
               <li
                 key={note.id}
-                className={`note-item ${note.completed ? 'completed' : ''} ${isNewNote ? 'new-note' : ''} ${isAnimatingComplete ? 'complete-animate' : ''}`}
+                className={`note-item ${note.completed ? 'completed' : ''} ${isNewNote ? 'new-note' : ''} ${isAnimatingComplete ? 'complete-animate' : ''} ${isAnimatingDelete ? 'delete-animate' : ''}`}
               >
                 <div className="note-main">
                   <label className="checkbox-container">
@@ -72,10 +90,10 @@ const NotesList: React.FC<NotesListProps> = ({ notes, onToggleComplete, onDelete
                   <small className="note-date">Created: {new Date(note.created_at).toLocaleString()}</small>
                   <button
                     className="delete-button"
-                    onClick={() => onDelete(note.id)}
+                    onClick={() => handleDeleteClick(note.id)}
                     aria-label={`Delete note ${note.text}`}
                     title={note.completed ? "Delete note" : "Cannot delete incomplete note"}
-                    disabled={!note.completed}
+                    disabled={!note.completed || isAnimatingDelete}
                   >
                     &times;
                   </button>
