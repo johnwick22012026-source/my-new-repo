@@ -19,6 +19,7 @@ const API_BASE = '';
 function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNoteText, setNewNoteText] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,11 +68,16 @@ function App() {
     }
   };
 
+  // Filter notes by search text
+  const filteredNotes = notes.filter(note =>
+    note.text.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
     <div className="app-container">
       <h1 className="app-title">Notes Management</h1>
 
-      <form className="note-form" onSubmit={handleSubmit}>
+      <form className="note-form" onSubmit={handleSubmit} aria-label="Add new note">
         <input
           type="text"
           placeholder="Enter a new note"
@@ -85,17 +91,26 @@ function App() {
         </button>
       </form>
 
+      <input
+        type="text"
+        placeholder="Search notes"
+        value={searchText}
+        onChange={e => setSearchText(e.target.value)}
+        className="search-input"
+        aria-label="Search notes"
+      />
+
       {loading && <p className="loading">Loading notes...</p>}
       {error && <p className="error">Error: {error}</p>}
 
       <ul className="notes-list">
-        {notes.map(note => (
+        {filteredNotes.map(note => (
           <li key={note.id} className="note-item">
             <p className="note-text">{note.text}</p>
             <small className="note-date">Created: {new Date(note.created_at).toLocaleString()}</small>
           </li>
         ))}
-        {notes.length === 0 && !loading && <p className="no-notes">No notes found.</p>}
+        {filteredNotes.length === 0 && !loading && <p className="no-notes">No notes found.</p>}
       </ul>
     </div>
   );
