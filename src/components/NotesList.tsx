@@ -39,7 +39,8 @@ const NotesList: React.FC<NotesListProps> = ({ notes, onToggleComplete, onDelete
               className="delete-button"
               onClick={() => onDelete(note.id)}
               aria-label={`Delete note ${note.text}`}
-              title="Delete note"
+              title={note.completed ? "Delete note" : "Cannot delete incomplete note"}
+              disabled={!note.completed}
             >
               &times;
             </button>
