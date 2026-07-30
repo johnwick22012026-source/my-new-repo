@@ -34,7 +34,7 @@ async def create_note(note_create: schemas.NoteCreate, db: Session = Depends(get
     )
     db.add(note)
     db.commit()
-    db.refresh(note)
+    db.refresh(note)  # Refresh to get the generated ID and timestamps immediately
     return note
 
 @app.put("/notes/{note_id}/completion", response_model=schemas.Note)
@@ -92,3 +92,11 @@ async def search_notes(query: Optional[str] = Query(None, min_length=1), db: Ses
     notes = db.query(models.Note).filter(models.Note.text.ilike(pattern)).all()
     return notes
 
+@app.get("/notes/exists")
+async def notes_exist(db: Session = Depends(get_db)):
+    """
+    Returns whether any notes exist in the database.
+    Response JSON: {"exists": true/false}
+    """
+    exists = db.query(models.Note.id).first() is not None
+    return {"exists": exists}
