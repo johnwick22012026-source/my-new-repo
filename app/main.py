@@ -87,8 +87,7 @@ async def search_notes(query: Optional[str] = Query(None, min_length=1), db: Ses
         notes = db.query(models.Note).all()
         return notes
 
-    # Use SQLite case-insensitive LIKE with lower() for safety
-    # The text column has NOCASE collation, but lower() ensures case-insensitive
+    # Use SQLite case-insensitive LIKE with ilike for case-insensitive search
     pattern = f"%{query}%"
     notes = db.query(models.Note).filter(models.Note.text.ilike(pattern)).all()
     return notes
