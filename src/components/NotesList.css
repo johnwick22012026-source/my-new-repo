@@ -182,3 +182,19 @@
 .note-item.complete-animate {
   animation: completeHighlight 0.6s ease forwards;
 }
+
+/* Animation for deletion */
+@keyframes fadeOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.note-item.delete-animate {
+  animation: fadeOutLeft 0.4s ease forwards;
+}
