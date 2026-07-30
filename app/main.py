@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 from .database import engine, Base, get_db
@@ -76,3 +76,20 @@ async def delete_note(note_id: int, confirm: bool = False, db: Session = Depends
     db.delete(note)
     db.commit()
     return note
+
+@app.get("/notes/search", response_model=List[schemas.Note])
+async def search_notes(query: Optional[str] = Query(None, min_length=1), db: Session = Depends(get_db)):
+    """
+    Search notes by text case-insensitively.
+    If query is None or empty, return all notes.
+    """
+    if not query:
+        notes = db.query(models.Note).all()
+        return notes
+
+    # Use SQLite case-insensitive LIKE with lower() for safety
+    # The text column has NOCASE collation, but lower() ensures case-insensitive
+    pattern = f"%{query}%"
+    notes = db.query(models.Note).filter(models.Note.text.ilike(pattern)).all()
+    return notes
+
