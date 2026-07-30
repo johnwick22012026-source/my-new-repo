@@ -22,6 +22,9 @@ function App() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
 
+  // State to track the newly added note ID for animation
+  const [newNoteId, setNewNoteId] = useState<number | null>(null);
+
   // Fetch notes from API
   const fetchNotes = useCallback(async (query = '') => {
     setLoading(true);
@@ -81,10 +84,17 @@ function App() {
       // Prepend the new note to the notes list
       setNotes(prev => [createdNote, ...prev]);
       setNewNoteText('');
+      setNewNoteId(createdNote.id); // Set new note ID for animation
+
       // If search is active, refetch notes with current search
       if (searchText.trim()) {
         fetchNotes(searchText);
       }
+
+      // Remove the newNoteId after animation duration (e.g., 500ms)
+      setTimeout(() => {
+        setNewNoteId(null);
+      }, 600);
     } catch (err: any) {
       setError(err.message || 'Unknown error');
     }
@@ -205,7 +215,7 @@ function App() {
       {loading && <p className="loading">Loading notes...</p>}
       {error && <p className="error">Error: {error}</p>}
 
-      <NotesList notes={notes} onToggleComplete={handleToggleComplete} onDelete={handleDeleteRequest} />
+      <NotesList notes={notes} onToggleComplete={handleToggleComplete} onDelete={handleDeleteRequest} newNoteId={newNoteId} />
 
       <ConfirmDeleteDialog
         isOpen={confirmDialogOpen}
