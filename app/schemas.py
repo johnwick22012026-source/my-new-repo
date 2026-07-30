@@ -28,3 +28,9 @@ class Note(NoteBase):
 class NoteCompleteRequest(BaseModel):
     id: int
     completed: bool
+
+    @validator('id')
+    def id_must_be_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Note id must be a positive integer')
+        return v
